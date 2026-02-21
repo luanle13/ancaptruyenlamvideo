@@ -1,0 +1,173 @@
+<!-- AnCapTruyenLamVideo - Stories Component Template -->
+<div class="stories-container">
+  <p-toast />
+  <p-confirmDialog />
+
+  <!-- Toolbar -->
+  <p-toolbar styleClass="mb-4">
+    <ng-template #start>
+      <h2 class="m-0">Stories Management</h2>
+    </ng-template>
+    <ng-template #end>
+      <p-button
+        label="New Story"
+        icon="pi pi-plus"
+        severity="primary"
+        (click)="openNew()"
+      />
+    </ng-template>
+  </p-toolbar>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <p-progressSpinner strokeWidth="4" />
+    </div>
+  } @else {
+    <!-- Stories Table -->
+    <p-table
+      [value]="stories()"
+      [tableStyle]="{ 'min-width': '60rem' }"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 25]"
+      [globalFilterFields]="['title', 'author', 'status']"
+      styleClass="p-datatable-striped"
+    >
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="title" style="width: 25%">
+            Title <p-sortIcon field="title" />
+          </th>
+          <th style="width: 35%">Description</th>
+          <th pSortableColumn="author" style="width: 15%">
+            Author <p-sortIcon field="author" />
+          </th>
+          <th pSortableColumn="status" style="width: 10%">
+            Status <p-sortIcon field="status" />
+          </th>
+          <th style="width: 15%">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-story>
+        <tr>
+          <td>{{ story.title }}</td>
+          <td class="description-cell">{{ story.description }}</td>
+          <td>{{ story.author }}</td>
+          <td>
+            <p-tag
+              [value]="story.status"
+              [severity]="getStatusSeverity(story.status)"
+            />
+          </td>
+          <td>
+            <p-button
+              icon="pi pi-pencil"
+              severity="info"
+              [rounded]="true"
+              [text]="true"
+              (click)="editStory(story)"
+              pTooltip="Edit"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [rounded]="true"
+              [text]="true"
+              (click)="deleteStory(story)"
+              pTooltip="Delete"
+            />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5" class="text-center p-4">
+            <div class="empty-state">
+              <i class="pi pi-book empty-icon"></i>
+              <p>No stories found. Click "New Story" to create one.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+
+  <!-- Story Dialog -->
+  <p-dialog
+    [(visible)]="storyDialog"
+    [style]="{ width: '500px' }"
+    [header]="dialogTitle()"
+    [modal]="true"
+    styleClass="p-fluid"
+  >
+    <ng-template #content>
+      <div class="field">
+        <label for="title">Title *</label>
+        <input
+          type="text"
+          pInputText
+          id="title"
+          [(ngModel)]="story.title"
+          required
+          autofocus
+          [class.ng-invalid]="submitted() && !story.title"
+        />
+        @if (submitted() && !story.title) {
+          <small class="p-error">Title is required.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="author">Author *</label>
+        <input
+          type="text"
+          pInputText
+          id="author"
+          [(ngModel)]="story.author"
+          required
+          [class.ng-invalid]="submitted() && !story.author"
+        />
+        @if (submitted() && !story.author) {
+          <small class="p-error">Author is required.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea
+          pTextarea
+          id="description"
+          [(ngModel)]="story.description"
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="field">
+        <label for="status">Status</label>
+        <p-select
+          id="status"
+          [(ngModel)]="story.status"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Status"
+        />
+      </div>
+    </ng-template>
+
+    <ng-template #footer>
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [text]="true"
+        (click)="hideDialog()"
+      />
+      <p-button
+        label="Save"
+        icon="pi pi-check"
+        (click)="saveStory()"
+      />
+    </ng-template>
+  </p-dialog>
+</div>
