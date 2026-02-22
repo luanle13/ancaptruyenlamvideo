@@ -24,6 +24,24 @@ class Settings(BaseSettings):
     # Environment
     environment: str = "development"
 
+    # DeepInfra Configuration
+    deepinfra_api_key: str = ""
+    deepinfra_base_url: str = "https://api.deepinfra.com/v1/openai"
+    qwen_model: str = "Qwen/Qwen3-VL-30B-A3B-Instruct"
+
+    # Crawler Configuration
+    crawler_user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    crawler_delay_min: float = 1.0
+    crawler_delay_max: float = 3.0
+    crawler_timeout: int = 30
+    crawler_max_retries: int = 3
+    batch_size: int = 10  # Chapters per AI batch
+    max_chapters_dev: int = 10  # Max chapters to process in development mode
+
+    # Storage paths
+    content_dir: str = "content"
+    images_dir: str = "images"
+
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS origins from comma-separated string."""

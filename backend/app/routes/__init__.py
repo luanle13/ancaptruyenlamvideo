@@ -1,2 +1,2 @@
 # AnCapTruyenLamVideo - Routes Package
-from .story import router as story_router
+from .crawler import router as crawler_router

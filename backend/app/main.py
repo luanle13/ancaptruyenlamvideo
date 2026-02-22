@@ -7,7 +7,7 @@ import logging
 
 from .config import get_settings
 from .database import Database
-from .routes.story import router as story_router
+from .routes.crawler import router as crawler_router
 
 # Configure logging
 logging.basicConfig(
@@ -50,22 +50,24 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="AnCapTruyenLamVideo API",
     description="""
-    AnCapTruyenLamVideo API - Backend service for managing stories.
+    AnCapTruyenLamVideo API - Manga Crawler and Video Script Generator.
 
     ## Features
-    - Full CRUD operations for Stories
-    - MongoDB integration (supports both Atlas and local)
-    - Async/await for optimal performance
+    - Crawl manga chapters from truyenqqno.com
+    - Download manga images automatically
+    - Generate Vietnamese video scripts using AI (Qwen3-VL)
+    - Real-time progress updates via SSE
+    - MongoDB integration for task management
 
-    ## Stories
-    Manage your stories with the following operations:
-    - **GET /api/stories** - List all stories
-    - **GET /api/stories/{id}** - Get a specific story
-    - **POST /api/stories** - Create a new story
-    - **PUT /api/stories/{id}** - Update an existing story
-    - **DELETE /api/stories/{id}** - Delete a story
+    ## Crawler
+    - **POST /api/crawler/tasks** - Create and start a crawl task
+    - **GET /api/crawler/tasks** - List all tasks
+    - **GET /api/crawler/tasks/{id}** - Get task details
+    - **GET /api/crawler/tasks/{id}/events** - SSE progress stream
+    - **POST /api/crawler/tasks/{id}/cancel** - Cancel a running task
+    - **GET /api/crawler/content/{id}** - Get generated scripts
     """,
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -85,7 +87,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(story_router)
+app.include_router(crawler_router)
 
 
 @app.get("/", tags=["health"])

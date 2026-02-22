@@ -2,5 +2,5 @@
 
 export const environment = {
   production: false,
-  apiBaseUrl: '/api' // Proxied to backend during development
+  apiBaseUrl: 'http://localhost:8000/api' // Proxied to backend during development
 };

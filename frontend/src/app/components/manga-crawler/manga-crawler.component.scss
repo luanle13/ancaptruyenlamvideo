@@ -1,0 +1,180 @@
+// AnCapTruyenLamVideo - Manga Crawler Component Styles
+
+.crawler-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .p-inputgroup {
+    width: 100%;
+  }
+
+  input {
+    flex: 1;
+  }
+
+  .hint {
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+  }
+}
+
+.progress-card {
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+
+    .task-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      h3 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+    }
+  }
+}
+
+.progress-section {
+  margin-bottom: 1.5rem;
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+    text-align: center;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.75rem;
+      background: var(--surface-ground);
+      border-radius: 0.5rem;
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-color-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .stat-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+    }
+  }
+}
+
+.log-section {
+  margin-bottom: 1.5rem;
+
+  h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+  }
+
+  .log-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .log-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--surface-ground);
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+
+    i {
+      flex-shrink: 0;
+      width: 1rem;
+      text-align: center;
+    }
+
+    .log-message {
+      flex: 1;
+    }
+
+    &.log-task_completed {
+      background: var(--green-50);
+      color: var(--green-700);
+    }
+
+    &.log-task_failed {
+      background: var(--red-50);
+      color: var(--red-700);
+    }
+
+    &.log-batch_completed {
+      background: var(--blue-50);
+      color: var(--blue-700);
+    }
+  }
+}
+
+.output-section {
+  margin-bottom: 1rem;
+
+  h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+  }
+
+  .file-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+.error-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--red-50);
+  border-radius: 0.5rem;
+
+  .error-message {
+    color: var(--red-700);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .progress-section .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .task-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .task-title {
+      flex-direction: column;
+      align-items: flex-start !important;
+    }
+  }
+}

@@ -19,5 +19,17 @@ python-dotenv>=1.0.0
 # DNS support for MongoDB Atlas connection strings
 dnspython>=2.4.0
 
-# For ObjectId handling
-bson>=0.5.10
+# Web scraping
+aiohttp>=3.9.0
+beautifulsoup4>=4.12.0
+lxml>=5.1.0
+
+# Image processing
+aiofiles>=23.2.0
+Pillow>=10.2.0
+
+# OpenAI-compatible client for DeepInfra
+openai>=1.12.0
+
+# SSE support
+sse-starlette>=2.0.0
