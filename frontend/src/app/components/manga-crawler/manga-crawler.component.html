@@ -81,6 +81,18 @@
               {{ currentTask()!.batches_processed }} / {{ currentTask()!.total_batches }}
             </span>
           </div>
+          @if (currentTask()!.status === 'generating_video' || currentTask()!.video_file) {
+            <div class="stat-item">
+              <span class="stat-label">Video</span>
+              <span class="stat-value">
+                @if (currentTask()!.video_file) {
+                  Ready
+                } @else {
+                  {{ currentTask()!.video_progress || 0 }}%
+                }
+              </span>
+            </div>
+          }
         </div>
       </div>
 
@@ -92,12 +104,13 @@
             @for (event of progressEvents(); track $index) {
               <div class="log-entry" [class]="'log-' + event.event_type">
                 <i class="pi" [ngClass]="{
-                  'pi-check-circle': event.event_type === 'task_completed' || event.event_type === 'batch_completed',
+                  'pi-check-circle': event.event_type === 'task_completed' || event.event_type === 'batch_completed' || event.event_type === 'video_completed',
                   'pi-times-circle': event.event_type === 'task_failed',
-                  'pi-spin pi-spinner': event.event_type.includes('processing') || event.event_type.includes('crawl'),
+                  'pi-spin pi-spinner': event.event_type.includes('processing') || event.event_type.includes('crawl') || event.event_type.includes('video_generating') || event.event_type.includes('video_progress'),
                   'pi-download': event.event_type === 'image_downloaded',
+                  'pi-video': event.event_type.includes('video'),
                   'pi-list': event.event_type === 'chapters_found',
-                  'pi-info-circle': !['task_completed', 'task_failed', 'batch_completed'].includes(event.event_type)
+                  'pi-info-circle': !['task_completed', 'task_failed', 'batch_completed', 'video_completed'].includes(event.event_type) && !event.event_type.includes('video')
                 }"></i>
                 <span class="log-message">{{ event.message }}</span>
               </div>
@@ -112,18 +125,35 @@
         </p-scrollPanel>
       </div>
 
-      <!-- Output Files -->
+      <!-- Video Output -->
+      @if (currentTask()!.video_file) {
+        <div class="output-section video-section">
+          <h4>Generated Video</h4>
+          <div class="file-list">
+            <p-button
+              [label]="getFileName(currentTask()!.video_file!)"
+              icon="pi pi-video"
+              severity="success"
+              (click)="downloadVideo()"
+            />
+          </div>
+        </div>
+      }
+
+      <!-- Script Files -->
       @if (currentTask()!.output_files && currentTask()!.output_files.length > 0) {
         <div class="output-section">
           <h4>Generated Scripts</h4>
           <div class="file-list">
             @for (file of currentTask()!.output_files; track file) {
-              <p-button
-                [label]="getFileName(file)"
-                icon="pi pi-download"
-                [outlined]="true"
-                (click)="downloadScript(getFileName(file))"
-              />
+              @if (!file.includes('.mp4')) {
+                <p-button
+                  [label]="getFileName(file)"
+                  icon="pi pi-download"
+                  [outlined]="true"
+                  (click)="downloadScript(getFileName(file))"
+                />
+              }
             }
           </div>
         </div>

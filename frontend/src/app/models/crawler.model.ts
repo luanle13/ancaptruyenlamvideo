@@ -5,6 +5,7 @@ export type TaskStatus =
   | 'crawling_chapters'
   | 'downloading_images'
   | 'processing_ai'
+  | 'generating_video'
   | 'completed'
   | 'failed'
   | 'cancelled';
@@ -30,6 +31,8 @@ export interface CrawlerTask {
   batches_processed: number;
   total_batches: number;
   output_files: string[];
+  video_file?: string;
+  video_progress: number;
   error_message?: string;
   created_at: string;
   updated_at: string;

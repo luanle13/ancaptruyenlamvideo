@@ -121,3 +121,36 @@ async def download_script(task_id: str, filename: str):
         media_type="text/plain; charset=utf-8",
         filename=filename
     )
+
+
+@router.get("/videos/{task_id}")
+async def get_task_videos(task_id: str):
+    """Get list of generated video files for a task."""
+    task = await CrawlerService.get_task(task_id)
+    if not task:
+        raise HTTPException(404, "Task not found")
+
+    videos_path = Path(settings.videos_dir) / task_id
+    if not videos_path.exists():
+        return {"files": []}
+
+    files = [str(f.name) for f in videos_path.iterdir() if f.is_file() and f.suffix == ".mp4"]
+    return {"files": sorted(files)}
+
+
+@router.get("/videos/{task_id}/{filename}")
+async def download_video(task_id: str, filename: str):
+    """Download a specific video file."""
+    task = await CrawlerService.get_task(task_id)
+    if not task:
+        raise HTTPException(404, "Task not found")
+
+    file_path = Path(settings.videos_dir) / task_id / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(404, "Video not found")
+
+    return FileResponse(
+        file_path,
+        media_type="video/mp4",
+        filename=filename
+    )

@@ -36,11 +36,12 @@ class Settings(BaseSettings):
     crawler_timeout: int = 30
     crawler_max_retries: int = 3
     batch_size: int = 10  # Chapters per AI batch
-    max_chapters_dev: int = 10  # Max chapters to process in development mode
+    max_chapters_dev: int = 5  # Max chapters to process in development mode
 
     # Storage paths
     content_dir: str = "content"
     images_dir: str = "images"
+    videos_dir: str = "videos"
 
     @property
     def cors_origins_list(self) -> List[str]:

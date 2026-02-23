@@ -63,6 +63,13 @@ export class CrawlerService {
   }
 
   /**
+   * Get download URL for a video file
+   */
+  getVideoUrl(taskId: string, filename: string): string {
+    return `${this.apiUrl}/videos/${taskId}/${filename}`;
+  }
+
+  /**
    * Handle HTTP errors
    */
   private handleError(error: HttpErrorResponse): Observable<never> {

@@ -11,6 +11,7 @@ class TaskStatus(str, Enum):
     CRAWLING_CHAPTERS = "crawling_chapters"
     DOWNLOADING_IMAGES = "downloading_images"
     PROCESSING_AI = "processing_ai"
+    GENERATING_VIDEO = "generating_video"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
@@ -44,6 +45,8 @@ class CrawlerTask(BaseModel):
     batches_processed: int = 0
     total_batches: int = 0
     output_files: List[str] = []
+    video_file: Optional[str] = None
+    video_progress: int = 0
     error_message: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -63,6 +66,9 @@ class ProgressEvent(BaseModel):
         "image_downloaded",
         "batch_processing",
         "batch_completed",
+        "video_generating",
+        "video_progress",
+        "video_completed",
         "task_completed",
         "task_failed",
         "progress_update"

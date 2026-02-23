@@ -19,6 +19,7 @@ from ..utils.event_bus import event_bus
 from .scraper import scraper
 from .image_downloader import image_downloader
 from .ai_processor import ai_processor
+from .video_generator import video_generator
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -326,27 +327,70 @@ class CrawlerService:
                     if i < len(chapters) - 1:
                         await cls.update_task(task_id, {"status": TaskStatus.DOWNLOADING_IMAGES.value})
 
-            # Phase 3: Combine scripts and cleanup
-            final_script = await ai_processor.combine_scripts(task_id, manga_title)
-            if final_script:
-                output_files.append(final_script)
+            # Phase 3: Combine scripts
+            final_script_path, script_content = await ai_processor.combine_scripts(task_id, manga_title)
+            if final_script_path:
+                output_files.append(final_script_path)
 
-            # Cleanup images
+            # Phase 4: Generate video
+            if cls.is_cancelled(task_id):
+                return
+
+            await cls.update_task(task_id, {"status": TaskStatus.GENERATING_VIDEO.value})
+            await cls._emit_progress(
+                task_id,
+                "video_generating",
+                "Generating video with narration...",
+                90,
+                {}
+            )
+
+            video_file = None
+            if script_content:
+                async def video_progress_callback(stage: str, progress: int):
+                    await cls.update_task(task_id, {"video_progress": progress})
+                    await cls._emit_progress(
+                        task_id,
+                        "video_progress",
+                        f"Video: {stage}",
+                        90 + (progress / 100) * 9,
+                        {"stage": stage, "video_progress": progress}
+                    )
+
+                video_file = await video_generator.generate_video(
+                    task_id=task_id,
+                    manga_title=manga_title,
+                    script_content=script_content,
+                    progress_callback=video_progress_callback
+                )
+
+                if video_file:
+                    output_files.append(video_file)
+                    await cls._emit_progress(
+                        task_id,
+                        "video_completed",
+                        "Video generation completed!",
+                        99,
+                        {"video_file": video_file}
+                    )
+
+            # Phase 5: Cleanup images
             await image_downloader.cleanup_task_images(task_id)
 
             # Mark as completed
             await cls.update_task(task_id, {
                 "status": TaskStatus.COMPLETED.value,
                 "output_files": output_files,
+                "video_file": video_file,
                 "completed_at": datetime.utcnow()
             })
 
             await cls._emit_progress(
                 task_id,
                 "task_completed",
-                f"Crawl completed! Generated {len(output_files)} script files.",
+                f"Completed! Generated {len(output_files)} files including video.",
                 100,
-                {"output_files": output_files}
+                {"output_files": output_files, "video_file": video_file}
             )
 
             logger.info(f"Task {task_id} completed successfully")

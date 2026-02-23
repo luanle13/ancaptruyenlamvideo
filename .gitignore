@@ -185,6 +185,9 @@ backend/images/
 # Generated script content
 backend/content/
 
+# Generated videos
+backend/videos/
+
 # ===================
 # Misc
 # ===================

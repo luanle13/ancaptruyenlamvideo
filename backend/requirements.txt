@@ -33,3 +33,9 @@ openai>=1.12.0
 
 # SSE support
 sse-starlette>=2.0.0
+
+# Text-to-Speech
+edge-tts>=6.1.0
+
+# Video processing (ffmpeg-python for Python bindings)
+ffmpeg-python>=0.2.0

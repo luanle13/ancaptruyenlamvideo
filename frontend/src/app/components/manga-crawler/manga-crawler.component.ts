@@ -70,6 +70,8 @@ export class MangaCrawlerComponent implements OnDestroy {
         return { severity: 'info' as const, label: 'Downloading Images' };
       case 'processing_ai':
         return { severity: 'warn' as const, label: 'Processing AI' };
+      case 'generating_video':
+        return { severity: 'warn' as const, label: 'Generating Video' };
       case 'completed':
         return { severity: 'success' as const, label: 'Completed' };
       case 'failed':
@@ -178,6 +180,18 @@ export class MangaCrawlerComponent implements OnDestroy {
     if (!task) return;
 
     const url = this.crawlerService.getDownloadUrl(task._id, filename);
+    window.open(url, '_blank');
+  }
+
+  /**
+   * Download the generated video
+   */
+  downloadVideo(): void {
+    const task = this.currentTask();
+    if (!task || !task.video_file) return;
+
+    const filename = this.getFileName(task.video_file);
+    const url = this.crawlerService.getVideoUrl(task._id, filename);
     window.open(url, '_blank');
   }
 
