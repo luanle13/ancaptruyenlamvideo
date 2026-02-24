@@ -8,6 +8,7 @@ import logging
 from .config import get_settings
 from .database import Database
 from .routes.crawler import router as crawler_router
+from .services.telegram_bot import telegram_bot
 
 # Configure logging
 logging.basicConfig(
@@ -39,10 +40,19 @@ async def lifespan(app: FastAPI):
         logger.error("The API will start but database operations will fail.")
         logger.error("Please check your MONGODB_URI configuration.")
 
+    # Start Telegram bot
+    try:
+        await telegram_bot.start()
+        if settings.telegram_bot_token:
+            logger.info("Telegram bot started")
+    except Exception as e:
+        logger.error(f"Failed to start Telegram bot: {e}")
+
     yield
 
     # Shutdown
     logger.info("AnCapTruyenLamVideo API Shutting down...")
+    await telegram_bot.stop()
     await Database.disconnect()
 
 

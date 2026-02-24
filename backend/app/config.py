@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     images_dir: str = "images"
     videos_dir: str = "videos"
 
+    # Telegram Bot Configuration
+    telegram_bot_token: str = ""
+    telegram_enabled: bool = True
+
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS origins from comma-separated string."""

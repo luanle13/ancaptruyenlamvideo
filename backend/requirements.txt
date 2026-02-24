@@ -39,3 +39,6 @@ edge-tts>=6.1.0
 
 # Video processing (ffmpeg-python for Python bindings)
 ffmpeg-python>=0.2.0
+
+# Telegram Bot
+python-telegram-bot>=21.0
