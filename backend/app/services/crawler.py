@@ -116,6 +116,16 @@ class CrawlerService:
         return False
 
     @classmethod
+    async def delete_all_tasks(cls) -> int:
+        """Delete all tasks from the database. Returns number of deleted tasks."""
+        collection = cls._get_collection()
+        result = await collection.delete_many({})
+        deleted_count = result.deleted_count
+        if deleted_count > 0:
+            logger.info(f"Deleted {deleted_count} tasks from database")
+        return deleted_count
+
+    @classmethod
     async def _cleanup_content(cls, task_id: str):
         """Cleanup content folder for a task."""
         content_path = Path(settings.content_dir) / task_id

@@ -52,6 +52,7 @@ class TelegramBotService:
             self.application.add_handler(CommandHandler("status", self._handle_status))
             self.application.add_handler(CommandHandler("cancel", self._handle_cancel))
             self.application.add_handler(CommandHandler("list", self._handle_list))
+            self.application.add_handler(CommandHandler("clear", self._handle_clear))
             self.application.add_handler(
                 MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_message)
             )
@@ -92,6 +93,7 @@ Các lệnh:
 /list - Xem danh sách truyện đã xử lý
 /status - Xem trạng thái task hiện tại
 /cancel - Hủy task đang chạy
+/clear - Xóa tất cả task trong database
 """
         await update.message.reply_text(welcome_message)
 
@@ -115,8 +117,10 @@ Lưu ý:
 Các lệnh:
 /start - Bắt đầu
 /help - Xem hướng dẫn này
+/list - Xem danh sách truyện đã xử lý
 /status - Xem trạng thái task
 /cancel - Hủy task đang chạy
+/clear - Xóa tất cả task trong database
 """
         await update.message.reply_text(help_message)
 
@@ -217,6 +221,33 @@ Tiến độ: {task.get('progress', 0)}%
                 await update.message.reply_text(chunk)
         else:
             await update.message.reply_text(full_message)
+
+    async def _handle_clear(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /clear command - delete all tasks from database."""
+        # Check if there's an active task running
+        chat_id = update.effective_chat.id
+        if chat_id in self.active_tasks:
+            await update.message.reply_text(
+                "⚠️ Đang có task đang chạy. Vui lòng đợi hoàn thành hoặc /cancel trước khi xóa."
+            )
+            return
+
+        await update.message.reply_text("🗑️ Đang xóa tất cả task...")
+
+        try:
+            deleted_count = await CrawlerService.delete_all_tasks()
+
+            if deleted_count > 0:
+                await update.message.reply_text(
+                    f"✅ Đã xóa {deleted_count} task từ database.\n"
+                    "📺 Video trên YouTube không bị ảnh hưởng."
+                )
+            else:
+                await update.message.reply_text("ℹ️ Không có task nào để xóa.")
+
+        except Exception as e:
+            logger.error(f"Error clearing tasks: {e}")
+            await update.message.reply_text(f"❌ Lỗi khi xóa task: {str(e)}")
 
     async def _handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle incoming messages (URLs)."""
