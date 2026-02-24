@@ -2,6 +2,53 @@
 <p-toast />
 
 <div class="crawler-container">
+  <!-- YouTube Settings -->
+  <p-card header="YouTube Settings" styleClass="youtube-card">
+    <div class="youtube-settings">
+      @if (youtubeStatus()) {
+        <div class="youtube-status">
+          <div class="status-info">
+            <i class="pi pi-youtube" style="font-size: 1.5rem; color: #ff0000;"></i>
+            <div class="status-text">
+              @if (youtubeStatus()!.authenticated) {
+                <span class="connected">YouTube Connected</span>
+                <small>Videos will be auto-uploaded ({{ youtubeStatus()!.privacy }})</small>
+              } @else {
+                <span class="disconnected">YouTube Not Connected</span>
+                <small>Connect to enable auto-upload</small>
+              }
+            </div>
+          </div>
+          <div class="status-actions">
+            @if (youtubeStatus()!.authenticated) {
+              <p-button
+                label="Disconnect"
+                icon="pi pi-times"
+                severity="secondary"
+                [outlined]="true"
+                [loading]="youtubeLoading()"
+                (click)="disconnectYouTube()"
+              />
+            } @else {
+              <p-button
+                label="Connect YouTube"
+                icon="pi pi-youtube"
+                severity="danger"
+                [loading]="youtubeLoading()"
+                (click)="connectYouTube()"
+              />
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="youtube-loading">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Loading YouTube status...</span>
+        </div>
+      }
+    </div>
+  </p-card>
+
   <!-- Input Section -->
   <p-card header="Manga Crawler" subheader="Crawl manga from truyenqqno.com and generate Vietnamese video scripts">
     <div class="input-section">
@@ -136,6 +183,14 @@
               severity="success"
               (click)="downloadVideo()"
             />
+            @if (currentTask()!.youtube_video_id) {
+              <p-button
+                label="View on YouTube"
+                icon="pi pi-youtube"
+                severity="danger"
+                (click)="openYouTube(currentTask()!.youtube_video_id!)"
+              />
+            }
           </div>
         </div>
       }

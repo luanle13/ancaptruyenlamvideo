@@ -16,6 +16,7 @@ import { MessageService } from 'primeng/api';
 
 import { CrawlerService } from '../../services/crawler.service';
 import { SseService } from '../../services/sse.service';
+import { YouTubeService, YouTubeStatus } from '../../services/youtube.service';
 import { CrawlerTask, ProgressEvent, TaskStatus } from '../../models/crawler.model';
 
 @Component({
@@ -42,6 +43,10 @@ export class MangaCrawlerComponent implements OnDestroy {
   isLoading = signal(false);
   currentTask = signal<CrawlerTask | null>(null);
   progressEvents = signal<ProgressEvent[]>([]);
+
+  // YouTube settings
+  youtubeStatus = signal<YouTubeStatus | null>(null);
+  youtubeLoading = signal(false);
 
   // Computed progress percentage
   overallProgress = computed(() => {
@@ -88,8 +93,24 @@ export class MangaCrawlerComponent implements OnDestroy {
   constructor(
     private crawlerService: CrawlerService,
     private sseService: SseService,
+    private youtubeService: YouTubeService,
     private messageService: MessageService
-  ) {}
+  ) {
+    // Load YouTube status on init
+    this.loadYouTubeStatus();
+
+    // Listen for auth success from popup window
+    window.addEventListener('message', (event) => {
+      if (event.data?.type === 'youtube_auth_success') {
+        this.loadYouTubeStatus();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'YouTube Connected',
+          detail: 'YouTube account connected successfully!'
+        });
+      }
+    });
+  }
 
   ngOnDestroy(): void {
     this.unsubscribeSSE();
@@ -196,6 +217,13 @@ export class MangaCrawlerComponent implements OnDestroy {
   }
 
   /**
+   * Open YouTube video in new tab
+   */
+  openYouTube(videoId: string): void {
+    window.open(`https://youtube.com/watch?v=${videoId}`, '_blank');
+  }
+
+  /**
    * Subscribe to SSE events for a task
    */
   private subscribeToTaskEvents(taskId: string): void {
@@ -263,5 +291,79 @@ export class MangaCrawlerComponent implements OnDestroy {
    */
   getFileName(path: string): string {
     return path.split('/').pop() || path;
+  }
+
+  /**
+   * Load YouTube authentication status
+   */
+  loadYouTubeStatus(): void {
+    this.youtubeService.getStatus().subscribe({
+      next: (status) => {
+        this.youtubeStatus.set(status);
+      },
+      error: (err) => {
+        console.error('Failed to load YouTube status:', err);
+      }
+    });
+  }
+
+  /**
+   * Start YouTube OAuth flow
+   */
+  connectYouTube(): void {
+    this.youtubeLoading.set(true);
+
+    this.youtubeService.startAuth().subscribe({
+      next: (response) => {
+        // Open auth URL in popup window
+        const width = 600;
+        const height = 700;
+        const left = (screen.width - width) / 2;
+        const top = (screen.height - height) / 2;
+
+        window.open(
+          response.auth_url,
+          'YouTube Authentication',
+          `width=${width},height=${height},left=${left},top=${top}`
+        );
+
+        this.youtubeLoading.set(false);
+      },
+      error: (err) => {
+        this.youtubeLoading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.message || 'Failed to start YouTube authentication'
+        });
+      }
+    });
+  }
+
+  /**
+   * Disconnect YouTube account
+   */
+  disconnectYouTube(): void {
+    this.youtubeLoading.set(true);
+
+    this.youtubeService.revokeAuth().subscribe({
+      next: () => {
+        this.youtubeStatus.update(status => status ? { ...status, authenticated: false } : status);
+        this.youtubeLoading.set(false);
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Disconnected',
+          detail: 'YouTube account disconnected'
+        });
+      },
+      error: (err) => {
+        this.youtubeLoading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.message || 'Failed to disconnect YouTube'
+        });
+      }
+    });
   }
 }

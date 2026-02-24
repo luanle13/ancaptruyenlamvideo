@@ -33,6 +33,7 @@ export interface CrawlerTask {
   output_files: string[];
   video_file?: string;
   video_progress: number;
+  youtube_video_id?: string;
   error_message?: string;
   created_at: string;
   updated_at: string;

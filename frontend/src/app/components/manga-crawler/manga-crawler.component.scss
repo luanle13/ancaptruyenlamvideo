@@ -9,6 +9,56 @@
   gap: 1.5rem;
 }
 
+// YouTube Settings
+.youtube-card {
+  :host ::ng-deep .p-card-body {
+    padding: 1rem;
+  }
+}
+
+.youtube-settings {
+  .youtube-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    .status-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .status-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        .connected {
+          color: var(--green-600);
+          font-weight: 600;
+        }
+
+        .disconnected {
+          color: var(--text-color-secondary);
+          font-weight: 600;
+        }
+
+        small {
+          color: var(--text-color-secondary);
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+
+  .youtube-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color-secondary);
+  }
+}
+
 .input-section {
   display: flex;
   flex-direction: column;
