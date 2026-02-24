@@ -1,7 +1,7 @@
 // AnCapTruyenLamVideo - Manga Crawler Component Styles
 
 .crawler-container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
   display: flex;
@@ -210,6 +210,83 @@
   .error-message {
     color: var(--red-700);
   }
+}
+
+// Tabs styling
+:host ::ng-deep {
+  .p-tabs {
+    .p-tablist {
+      margin-bottom: 1rem;
+    }
+
+    .p-tab {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+// History tab styles
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+  color: var(--text-color-secondary);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+
+  p {
+    margin: 0;
+    color: var(--text-color-secondary);
+  }
+}
+
+.manga-title {
+  font-weight: 600;
+}
+
+.manga-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.youtube-link {
+  color: #ff0000;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.no-youtube {
+  color: var(--text-color-secondary);
 }
 
 // Responsive adjustments

@@ -2,8 +2,23 @@
 <p-toast />
 
 <div class="crawler-container">
-  <!-- YouTube Settings -->
-  <p-card header="YouTube Settings" styleClass="youtube-card">
+  <p-tabs [value]="0" (valueChange)="onTabChange($event)">
+    <p-tablist>
+      <p-tab [value]="0">
+        <i class="pi pi-play-circle"></i>
+        <span>Crawler</span>
+      </p-tab>
+      <p-tab [value]="1">
+        <i class="pi pi-history"></i>
+        <span>History</span>
+      </p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <!-- Crawler Tab -->
+      <p-tabpanel [value]="0">
+        <!-- YouTube Settings -->
+        <p-card header="YouTube Settings" styleClass="youtube-card">
     <div class="youtube-settings">
       @if (youtubeStatus()) {
         <div class="youtube-status">
@@ -223,4 +238,84 @@
       }
     </p-card>
   }
+      </p-tabpanel>
+
+      <!-- History Tab -->
+      <p-tabpanel [value]="1">
+        <p-card header="Task History" subheader="All processed manga">
+          @if (historyLoading()) {
+            <div class="loading-spinner">
+              <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+              <span>Loading...</span>
+            </div>
+          } @else if (allTasks().length === 0) {
+            <div class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: var(--p-text-muted-color);"></i>
+              <p>No tasks found</p>
+            </div>
+          } @else {
+            <p-table
+              [value]="allTasks()"
+              [paginator]="true"
+              [rows]="10"
+              [rowsPerPageOptions]="[5, 10, 25]"
+              [tableStyle]="{ 'min-width': '60rem' }"
+              styleClass="p-datatable-sm"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Manga</th>
+                  <th>URL</th>
+                  <th>Status</th>
+                  <th>YouTube</th>
+                  <th>Created</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-task>
+                <tr>
+                  <td>
+                    <span class="manga-title">{{ task.manga_title || 'N/A' }}</span>
+                  </td>
+                  <td>
+                    <a [href]="task.manga_url" target="_blank" class="manga-link">
+                      <i class="pi pi-external-link"></i>
+                      {{ task.manga_url | slice:0:50 }}{{ task.manga_url.length > 50 ? '...' : '' }}
+                    </a>
+                  </td>
+                  <td>
+                    <p-tag
+                      [value]="getStatusLabel(task.status)"
+                      [severity]="getStatusSeverity(task.status)"
+                    />
+                  </td>
+                  <td>
+                    @if (task.youtube_video_id) {
+                      <a
+                        [href]="'https://youtube.com/watch?v=' + task.youtube_video_id"
+                        target="_blank"
+                        class="youtube-link"
+                      >
+                        <i class="pi pi-youtube" style="color: #ff0000;"></i>
+                        View
+                      </a>
+                    } @else {
+                      <span class="no-youtube">-</span>
+                    }
+                  </td>
+                  <td>
+                    {{ task.created_at | date:'short' }}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="5" class="text-center">No tasks found</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          }
+        </p-card>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
 </div>

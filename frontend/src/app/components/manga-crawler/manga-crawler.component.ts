@@ -12,6 +12,8 @@ import { ToastModule } from 'primeng/toast';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TagModule } from 'primeng/tag';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { TabsModule } from 'primeng/tabs';
+import { TableModule } from 'primeng/table';
 import { MessageService } from 'primeng/api';
 
 import { CrawlerService } from '../../services/crawler.service';
@@ -31,7 +33,9 @@ import { CrawlerTask, ProgressEvent, TaskStatus } from '../../models/crawler.mod
     ToastModule,
     ProgressBarModule,
     TagModule,
-    ScrollPanelModule
+    ScrollPanelModule,
+    TabsModule,
+    TableModule
   ],
   providers: [MessageService],
   templateUrl: './manga-crawler.component.html',
@@ -47,6 +51,10 @@ export class MangaCrawlerComponent implements OnDestroy {
   // YouTube settings
   youtubeStatus = signal<YouTubeStatus | null>(null);
   youtubeLoading = signal(false);
+
+  // Task history
+  allTasks = signal<CrawlerTask[]>([]);
+  historyLoading = signal(false);
 
   // Computed progress percentage
   overallProgress = computed(() => {
@@ -365,5 +373,83 @@ export class MangaCrawlerComponent implements OnDestroy {
         });
       }
     });
+  }
+
+  /**
+   * Load all tasks for history tab
+   */
+  loadTaskHistory(): void {
+    this.historyLoading.set(true);
+
+    this.crawlerService.getTasks().subscribe({
+      next: (tasks) => {
+        this.allTasks.set(tasks);
+        this.historyLoading.set(false);
+      },
+      error: (err) => {
+        this.historyLoading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.message || 'Failed to load task history'
+        });
+      }
+    });
+  }
+
+  /**
+   * Handle tab change
+   */
+  onTabChange(value: string | number | undefined): void {
+    if (value === 1) {
+      // History tab selected - refresh data
+      this.loadTaskHistory();
+    }
+  }
+
+  /**
+   * Get status severity for table tag
+   */
+  getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
+    switch (status) {
+      case 'completed':
+        return 'success';
+      case 'crawling_chapters':
+      case 'downloading_images':
+        return 'info';
+      case 'processing_ai':
+      case 'generating_video':
+        return 'warn';
+      case 'failed':
+        return 'danger';
+      default:
+        return 'secondary';
+    }
+  }
+
+  /**
+   * Get status label
+   */
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'crawling_chapters':
+        return 'Crawling';
+      case 'downloading_images':
+        return 'Downloading';
+      case 'processing_ai':
+        return 'Processing AI';
+      case 'generating_video':
+        return 'Generating Video';
+      case 'completed':
+        return 'Completed';
+      case 'failed':
+        return 'Failed';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status;
+    }
   }
 }
