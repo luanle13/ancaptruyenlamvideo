@@ -454,20 +454,24 @@ class CrawlerService:
             # Phase 6: Cleanup images
             await image_downloader.cleanup_task_images(task_id)
 
-            # Phase 7: Full cleanup after successful YouTube upload
-            youtube_url = None
+            # Phase 7: Cleanup and mark as completed
+            youtube_url = f"https://youtube.com/watch?v={youtube_video_id}" if youtube_video_id else None
+
             if youtube_video_id:
-                youtube_url = f"https://youtube.com/watch?v={youtube_video_id}"
-
-                # Cleanup content folder
+                # Cleanup content and videos folder after successful YouTube upload
                 await cls._cleanup_content(task_id)
-
-                # Cleanup videos folder
                 await cls._cleanup_videos(task_id)
 
-                # Delete task from database
-                await cls.delete_task(task_id)
+            # Mark as completed
+            await cls.update_task(task_id, {
+                "status": TaskStatus.COMPLETED.value,
+                "output_files": output_files if not youtube_video_id else [],
+                "video_file": video_file if not youtube_video_id else None,
+                "youtube_video_id": youtube_video_id,
+                "completed_at": datetime.utcnow()
+            })
 
+            if youtube_video_id:
                 await cls._emit_progress(
                     task_id,
                     "task_completed",
@@ -475,26 +479,15 @@ class CrawlerService:
                     100,
                     {"youtube_url": youtube_url}
                 )
-
                 logger.info(f"Task {task_id} completed and cleaned up successfully")
             else:
-                # Keep files if YouTube upload failed/skipped
-                await cls.update_task(task_id, {
-                    "status": TaskStatus.COMPLETED.value,
-                    "output_files": output_files,
-                    "video_file": video_file,
-                    "youtube_video_id": youtube_video_id,
-                    "completed_at": datetime.utcnow()
-                })
-
                 await cls._emit_progress(
                     task_id,
                     "task_completed",
                     f"Completed! Generated {len(output_files)} files including video.",
                     100,
-                    {"output_files": output_files, "video_file": video_file, "youtube_url": youtube_url}
+                    {"output_files": output_files, "video_file": video_file}
                 )
-
                 logger.info(f"Task {task_id} completed (YouTube upload skipped, files retained)")
 
         except asyncio.CancelledError:

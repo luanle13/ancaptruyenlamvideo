@@ -51,6 +51,7 @@ class TelegramBotService:
             self.application.add_handler(CommandHandler("help", self._handle_help))
             self.application.add_handler(CommandHandler("status", self._handle_status))
             self.application.add_handler(CommandHandler("cancel", self._handle_cancel))
+            self.application.add_handler(CommandHandler("list", self._handle_list))
             self.application.add_handler(
                 MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_message)
             )
@@ -88,6 +89,7 @@ https://truyenqqno.com/truyen-tranh/ten-truyen-12345
 
 Các lệnh:
 /help - Xem hướng dẫn
+/list - Xem danh sách truyện đã xử lý
 /status - Xem trạng thái task hiện tại
 /cancel - Hủy task đang chạy
 """
@@ -156,6 +158,65 @@ Tiến độ: {task.get('progress', 0)}%
             await update.message.reply_text("Đã hủy task thành công.")
         else:
             await update.message.reply_text("Không thể hủy task (có thể đã hoàn thành hoặc lỗi).")
+
+    async def _handle_list(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /list command - show all processed manga."""
+        tasks = await CrawlerService.get_all_tasks()
+
+        if not tasks:
+            await update.message.reply_text("Chưa có truyện nào được xử lý.")
+            return
+
+        # Filter only completed tasks with YouTube uploads
+        completed_tasks = [
+            task for task in tasks
+            if task.get("status") == "completed"
+        ]
+
+        if not completed_tasks:
+            await update.message.reply_text("Chưa có truyện nào hoàn thành.")
+            return
+
+        # Build message
+        message_parts = ["📚 Danh sách truyện đã xử lý:\n"]
+
+        for i, task in enumerate(completed_tasks, 1):
+            manga_title = task.get("manga_title", "Unknown")
+            manga_url = task.get("manga_url", "N/A")
+            youtube_video_id = task.get("youtube_video_id")
+
+            entry = f"\n{i}. {manga_title}\n"
+            entry += f"   📖 URL: {manga_url}\n"
+
+            if youtube_video_id:
+                entry += f"   🎬 YouTube: https://youtube.com/watch?v={youtube_video_id}\n"
+            else:
+                entry += "   🎬 YouTube: Chưa upload\n"
+
+            message_parts.append(entry)
+
+        full_message = "".join(message_parts)
+
+        # Telegram has a 4096 character limit per message
+        if len(full_message) > 4000:
+            # Split into multiple messages
+            chunks = []
+            current_chunk = message_parts[0]
+
+            for part in message_parts[1:]:
+                if len(current_chunk) + len(part) > 4000:
+                    chunks.append(current_chunk)
+                    current_chunk = part
+                else:
+                    current_chunk += part
+
+            if current_chunk:
+                chunks.append(current_chunk)
+
+            for chunk in chunks:
+                await update.message.reply_text(chunk)
+        else:
+            await update.message.reply_text(full_message)
 
     async def _handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle incoming messages (URLs)."""
