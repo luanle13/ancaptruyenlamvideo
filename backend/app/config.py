@@ -47,6 +47,13 @@ class Settings(BaseSettings):
     telegram_bot_token: str = ""
     telegram_enabled: bool = True
 
+    # YouTube Upload Configuration
+    youtube_client_secrets_file: str = "client_secrets.json"
+    youtube_credentials_file: str = "youtube_credentials.json"
+    youtube_enabled: bool = True
+    youtube_default_privacy: str = "private"  # private, unlisted, public
+    youtube_default_category: str = "22"  # 22 = People & Blogs
+
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS origins from comma-separated string."""

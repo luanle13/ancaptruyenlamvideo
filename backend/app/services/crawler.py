@@ -20,6 +20,7 @@ from .scraper import scraper
 from .image_downloader import image_downloader
 from .ai_processor import ai_processor
 from .video_generator import video_generator
+from .youtube_uploader import youtube_uploader
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -370,11 +371,59 @@ class CrawlerService:
                         task_id,
                         "video_completed",
                         "Video generation completed!",
-                        99,
+                        95,
                         {"video_file": video_file}
                     )
 
-            # Phase 5: Cleanup images
+            # Phase 5: Upload to YouTube
+            youtube_video_id = None
+            if video_file and settings.youtube_enabled:
+                if cls.is_cancelled(task_id):
+                    return
+
+                await cls._emit_progress(
+                    task_id,
+                    "youtube_uploading",
+                    "Uploading video to YouTube...",
+                    96,
+                    {}
+                )
+
+                try:
+                    # Generate description from script
+                    description = f"Manga: {manga_title}\n\nVideo được tạo tự động bởi AnCapTruyenLamVideo."
+                    if script_content:
+                        # Use first 500 chars of script as description
+                        preview = script_content[:500].strip()
+                        if len(script_content) > 500:
+                            preview += "..."
+                        description = f"{preview}\n\n---\nManga: {manga_title}"
+
+                    youtube_video_id = await youtube_uploader.upload_video(
+                        video_path=video_file,
+                        title=f"{manga_title} - Truyện Tranh",
+                        description=description,
+                        tags=["manga", "truyện tranh", "anime", manga_title],
+                        privacy_status=settings.youtube_default_privacy
+                    )
+
+                    if youtube_video_id:
+                        await cls._emit_progress(
+                            task_id,
+                            "youtube_completed",
+                            f"YouTube upload completed!",
+                            99,
+                            {"youtube_video_id": youtube_video_id}
+                        )
+                        logger.info(f"YouTube upload successful: {youtube_video_id}")
+                    else:
+                        logger.warning("YouTube upload failed or not authenticated")
+
+                except Exception as e:
+                    logger.error(f"YouTube upload error: {e}")
+                    # Don't fail the task, just log the error
+
+            # Phase 6: Cleanup images
             await image_downloader.cleanup_task_images(task_id)
 
             # Mark as completed
@@ -382,15 +431,17 @@ class CrawlerService:
                 "status": TaskStatus.COMPLETED.value,
                 "output_files": output_files,
                 "video_file": video_file,
+                "youtube_video_id": youtube_video_id,
                 "completed_at": datetime.utcnow()
             })
 
+            youtube_url = f"https://youtube.com/watch?v={youtube_video_id}" if youtube_video_id else None
             await cls._emit_progress(
                 task_id,
                 "task_completed",
                 f"Completed! Generated {len(output_files)} files including video.",
                 100,
-                {"output_files": output_files, "video_file": video_file}
+                {"output_files": output_files, "video_file": video_file, "youtube_url": youtube_url}
             )
 
             logger.info(f"Task {task_id} completed successfully")

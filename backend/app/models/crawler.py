@@ -47,6 +47,7 @@ class CrawlerTask(BaseModel):
     output_files: List[str] = []
     video_file: Optional[str] = None
     video_progress: int = 0
+    youtube_video_id: Optional[str] = None
     error_message: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -69,6 +70,8 @@ class ProgressEvent(BaseModel):
         "video_generating",
         "video_progress",
         "video_completed",
+        "youtube_uploading",
+        "youtube_completed",
         "task_completed",
         "task_failed",
         "progress_update"

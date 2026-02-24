@@ -8,6 +8,7 @@ import logging
 from .config import get_settings
 from .database import Database
 from .routes.crawler import router as crawler_router
+from .routes.youtube import router as youtube_router
 from .services.telegram_bot import telegram_bot
 
 # Configure logging
@@ -98,6 +99,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(crawler_router)
+app.include_router(youtube_router)
 
 
 @app.get("/", tags=["health"])

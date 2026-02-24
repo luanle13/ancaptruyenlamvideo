@@ -223,6 +223,7 @@ Tiến độ: {task.get('progress', 0)}%
 
                 if status == "completed":
                     video_file = task.get("video_file", "")
+                    youtube_video_id = task.get("youtube_video_id", "")
                     message = (
                         f"✅ Hoàn thành!\n\n"
                         f"Truyện: {manga_title}\n"
@@ -230,6 +231,8 @@ Tiến độ: {task.get('progress', 0)}%
                     )
                     if video_file:
                         message += f"Video: {video_file}\n"
+                    if youtube_video_id:
+                        message += f"YouTube: https://youtube.com/watch?v={youtube_video_id}\n"
                     message += "\nCảm ơn bạn đã sử dụng!"
 
                 elif status == "failed":

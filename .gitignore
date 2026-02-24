@@ -188,6 +188,19 @@ backend/content/
 # Generated videos
 backend/videos/
 
+# Temporary video processing
+backend/temp_video/
+
+# ===================
+# API Credentials
+# ===================
+
+# YouTube OAuth credentials (sensitive!)
+client_secrets.json
+youtube_credentials.json
+backend/client_secrets.json
+backend/youtube_credentials.json
+
 # ===================
 # Misc
 # ===================
