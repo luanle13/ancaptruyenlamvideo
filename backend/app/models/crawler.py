@@ -67,6 +67,7 @@ class ProgressEvent(BaseModel):
         "image_downloaded",
         "batch_processing",
         "batch_completed",
+        "refining_script",
         "video_generating",
         "video_progress",
         "video_completed",

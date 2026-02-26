@@ -371,6 +371,22 @@ class CrawlerService:
             if final_script_path:
                 output_files.append(final_script_path)
 
+            # Phase 3.5: Refine script for TTS
+            if script_content:
+                if cls.is_cancelled(task_id):
+                    return
+
+                await cls._emit_progress(
+                    task_id,
+                    "refining_script",
+                    "Refining story for audio generation...",
+                    88,
+                    {}
+                )
+
+                script_content = await ai_processor.refine_script(script_content, manga_title)
+                logger.info(f"Script refined, final length: {len(script_content)} characters")
+
             # Phase 4: Generate video
             if cls.is_cancelled(task_id):
                 return
